@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+   <!-- <include resource="org/springframework/boot/logging/logback/defaults.xml"/>-->
+
+    <jmxConfigurator/>
+    <property name ="HOME_FILE" value ="logs/app.log"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) %cyan(%class{50}.%M:%L) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file" class="ch.qos.logback.core.FileAppender">
+        <file>${HOME_FILE}</file>
+        <append>true</append>
+        <immediateFlush>true</immediateFlush>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%date %-5level %logger{50}.%M.%L - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.lyudmila.topliba" level="debug" additivity="false">
+        <appender-ref ref="file" />
+        <appender-ref ref ="console" />
+    </logger>
+
+    <root level="info">
+        <appender-ref ref="file" />
+        <appender-ref ref ="console" />
+    </root>
+</configuration>
