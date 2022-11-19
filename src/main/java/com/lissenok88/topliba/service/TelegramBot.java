@@ -3,7 +3,6 @@ package com.lissenok88.topliba.service;
 import com.lissenok88.topliba.config.BotConfig;
 import com.lissenok88.topliba.job.ToplibaParser;
 import com.lissenok88.topliba.model.Book;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -19,7 +18,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private static final String SEARCH_BUTTON = "Найти книгу.";
     private static final String START_MESSAGE1 = "Это телеграмбот для поиска и скачивания книг с сайта.";
     private static final String START_MESSAGE2 = "[Topliba](https://topliba.com/)";
-    private static final String START_MESSAGE3 = "Чтобы найти книгу нажмите книпку \"Найти книгу\"";
+    private static final String START_MESSAGE3 = "Чтобы найти книгу нажмите кнопку \"Найти книгу\"";
     private static final String MESSAGE_SEARCH_BUTTON = "Напишите без ошибок название книги или имя автора.";
     private static final String SEARCH_MESSAGE = "Ищем книги по запросу: ";
     private static final String SEARCH_ERROR = "Искомая книга или автор не найден.";
@@ -36,7 +35,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     @Override
-    @Value("${bot.token}")
     public String getBotToken() {
         return config.token;
     }

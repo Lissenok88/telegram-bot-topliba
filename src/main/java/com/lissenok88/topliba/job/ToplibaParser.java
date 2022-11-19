@@ -1,12 +1,14 @@
 package com.lissenok88.topliba.job;
 
 import com.lissenok88.topliba.model.Book;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class ToplibaParser {
             return new ArrayList<>();
         }
         int position = positionCounter;
-        Document doc = HttpConnector.getHtml(pageUrl);
+        Document doc = getHtml(pageUrl);
         Elements elements = doc.getElementsByClass("media-body");
         List<Book> element = elements.stream().map(q -> {
             Book bookInformation = new Book();
@@ -80,33 +82,42 @@ public class ToplibaParser {
     }
 
     public static Book fillElements(String url) {
-        Book bookInformation = new Book();
-        Document doc = HttpConnector.getHtml(url, (response) -> {
-            if (response.getStatusCode() == 200) {
-                return true;
-            }
-            return false;
-        });
-        bookInformation.setTitle(doc.getElementsByClass("book-title").first().text());
-        bookInformation.setDescription(doc.getElementsByClass("description").first().text());
+        Book book = new Book();
+        Document doc = getHtml(url);
+        book.setTitle(doc.getElementsByClass("book-title").first().text());
+        book.setDescription(doc.getElementsByClass("description").first().text());
         String danger = doc.getElementsByClass("alert-danger").text();
         if (!danger.equals("")) {
-            bookInformation.setFragment(danger + " \n\r Данный файл скачать невозможно.");
-            bookInformation.setUrlFb2("");
+            book.setFragment(danger + " \n\r Данный файл скачать невозможно.");
+            book.setUrlFb2("");
         } else {
             String el = doc.getElementsByClass("alert-info").text();
             int index = el.indexOf("Доступен");
             if (index != -1) {
-                bookInformation.setFragment("Скачать ознакомительный фрагмент");
-            } else bookInformation.setFragment("Скачать файл полностью");
+                book.setFragment("Скачать ознакомительный фрагмент");
+            } else book.setFragment("Скачать файл полностью");
             String urlFb2 = doc.getElementsByAttributeValue("rel", "nofollow").first().attr("href");
             if (urlFb2 != null) {
                 if (!urlFb2.contains("http"))
                     urlFb2 = "https://topliba.com" + urlFb2;
             } else
                 urlFb2 = "";
-            bookInformation.setUrlFb2(urlFb2);
+            book.setUrlFb2(urlFb2);
         }
-        return bookInformation;
+        return book;
+    }
+
+    private static Document getHtml(String url) {
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(url)
+                    .userAgent("Mozilla")
+                    .timeout(5000)
+                    .referrer("https://google.com")
+                    .get();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        return doc;
     }
 }
