@@ -18,18 +18,18 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MessageProcessing extends TelegramBot {
-    private final ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+    private static final Logger log = LoggerFactory.getLogger(MessageProcessing.class);
     private static final String SEARCH_BUTTON_NAME = "Найти книгу.";
     private static final String DOWNLOAD_BUTTON_NAME = "fb2";
     private static final String DOWNLOAD_FILE_MESSAGE = "Открыть файл";
     private static final String DOWNLOAD_FILE_ERROR = "Что-то пошло не так. Невозможно скачать файл.";
     private static final int COUNT_OF_BOOKS_ON_PAGE = 5;
     private static final int FIRST_PAGE = 1;
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageProcessing.class);
+    private final ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
 
     public MessageProcessing(BotConfig config) {
         super(config);
@@ -44,7 +44,7 @@ public class MessageProcessing extends TelegramBot {
             sendMessage.setText(update);
             execute(sendMessage);
         } catch (TelegramApiException e) {
-            LOGGER.error(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 
@@ -63,12 +63,12 @@ public class MessageProcessing extends TelegramBot {
             sendMessage.setReplyMarkup(inlineKeyboardMarkup);
             execute(sendMessage);
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 
     public void editMessageListBooks(String textButton, Message message,
-                                     HashMap<String, ArrayList<Book>> listRequest) {
+                                     Map<String, List<Book>> listRequest) {
         int page = getPage(textButton);
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         String nameSearch = getNameSearch(textButton);
@@ -85,7 +85,7 @@ public class MessageProcessing extends TelegramBot {
             editMessageText.setReplyMarkup(inlineKeyboardMarkup);
             execute(editMessageText);
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 
@@ -109,8 +109,7 @@ public class MessageProcessing extends TelegramBot {
         return pageText.toString();
     }
 
-    private List<InlineKeyboardButton> formPageButtonsListBooks(int page, List<Book> foundBooks,
-                                                                String nameSearch) {
+    private List<InlineKeyboardButton> formPageButtonsListBooks(int page, List<Book> foundBooks, String nameSearch) {
         int position = page * COUNT_OF_BOOKS_ON_PAGE - COUNT_OF_BOOKS_ON_PAGE;
         List<InlineKeyboardButton> keyboardButtons = new ArrayList<>();
         if (page != FIRST_PAGE) {
@@ -131,8 +130,7 @@ public class MessageProcessing extends TelegramBot {
         keyboardButtons.add(buttonBack);
     }
 
-    private void addButtonsBookNumbers(int position, List<Book> foundBooks,
-                                       List<InlineKeyboardButton> keyboardButtons) {
+    private void addButtonsBookNumbers(int position, List<Book> foundBooks, List<InlineKeyboardButton> keyboardButtons) {
         for (int i = 0; i < COUNT_OF_BOOKS_ON_PAGE; i++) {
             if (position < foundBooks.size() && foundBooks.get(position).getUrl() != null) {
                 int bookNumber = position + 1;
@@ -172,7 +170,7 @@ public class MessageProcessing extends TelegramBot {
                 execute(sendMessage);
             }
         } catch (TelegramApiException e) {
-            LOGGER.error(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 
@@ -204,7 +202,7 @@ public class MessageProcessing extends TelegramBot {
             execute(sendDocument);
         } catch (TelegramApiException e) {
             message(message, DOWNLOAD_FILE_ERROR);
-            LOGGER.error(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 
@@ -245,7 +243,7 @@ public class MessageProcessing extends TelegramBot {
         return page;
     }
 
-    private void deleteMessage(Message message) {
+    public void deleteMessage(Message message) {
         DeleteMessage deleteMessage = new DeleteMessage();
         deleteMessage.setChatId(String.valueOf(message.getChatId()));
         deleteMessage.setMessageId(message.getMessageId());
@@ -254,7 +252,7 @@ public class MessageProcessing extends TelegramBot {
         try {
             execute(deleteMessage);
         } catch (TelegramApiException ex) {
-            LOGGER.error(ex.getMessage());
+            log.error(ex.getMessage());
         }
     }
 

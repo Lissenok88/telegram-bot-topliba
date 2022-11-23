@@ -1,7 +1,7 @@
 package com.lissenok88.topliba.service;
 
 import com.lissenok88.topliba.config.BotConfig;
-import com.lissenok88.topliba.job.ToplibaParser;
+import com.lissenok88.topliba.job.BookParser;
 import com.lissenok88.topliba.model.Book;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -11,6 +11,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
@@ -20,9 +22,9 @@ public class TelegramBot extends TelegramLongPollingBot {
     private static final String START_MESSAGE2 = "[Topliba](https://topliba.com/)";
     private static final String START_MESSAGE3 = "Чтобы найти книгу нажмите кнопку \"Найти книгу\"";
     private static final String MESSAGE_SEARCH_BUTTON = "Напишите без ошибок название книги или имя автора.";
-    private static final String SEARCH_MESSAGE = "Ищем книги по запросу: ";
+    private static final String SEARCH_MESSAGE = "Запрос принят в обработку: ожидайте";
     private static final String SEARCH_ERROR = "Искомая книга или автор не найден.";
-    private final HashMap<String, ArrayList<Book>> listRequest = new HashMap<>();
+    private final Map<String, List<Book>> listRequest = new HashMap<>();
     final BotConfig config;
 
     public TelegramBot(BotConfig config) {
@@ -57,8 +59,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     System.lineSeparator().repeat(2) + START_MESSAGE3);
             case SEARCH_BUTTON -> messageProcessing.message(getMessage, MESSAGE_SEARCH_BUTTON);
             default -> {
-                messageProcessing.message(getMessage, SEARCH_MESSAGE + getMessage.getText());
-                ArrayList<Book> foundBooks = new ArrayList<>(ToplibaParser.parser(getMessage.getText()));
+                messageProcessing.message(getMessage, SEARCH_MESSAGE);
+                List<Book> foundBooks = new ArrayList<>(BookParser.parser(getMessage.getText()));
                 listRequest.put(getMessage.getText(), foundBooks);
                 if (!foundBooks.isEmpty()) {
                     messageProcessing.messageListBooks(getMessage, foundBooks);
@@ -76,8 +78,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else if (selectButton.contains("->") || (selectButton.contains("<-"))) {
             messageProcessing.editMessageListBooks(callbackQuery.getData(), callbackQuery.getMessage(), listRequest);
         } else {
+            messageProcessing.deleteMessage(callbackQuery.getMessage());
             messageProcessing.messageAboutBook(callbackQuery.getMessage().getChatId().toString(),
-                    ToplibaParser.fillElements(callbackQuery.getData()));
+                    BookParser.fillElements(callbackQuery.getData()));
         }
     }
 }

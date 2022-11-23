@@ -12,45 +12,46 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ToplibaParser {
+public class BookParser {
+    private static final Logger log = LoggerFactory.getLogger(BookParser.class);
     private static final String urlBase = "https://topliba.com/?q=";
-    private boolean needStop;
     private static String key;
+    private boolean needStop;
     private int positionCounter = 1;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToplibaParser.class);
+
 
     public static List<Book> parser(String message) {
-        ArrayList<Book> list = new ArrayList<>();
+        List<Book> list = new ArrayList<>();
         try {
-            ToplibaParser parser = new ToplibaParser();
+            BookParser bookParser = new BookParser();
             key = message.replace(" ", "%20");
-            list = new ArrayList<>(parser.startParser());
+            list = new ArrayList<>(bookParser.startParser());
         } catch (Exception ex) {
-            LOGGER.error(ex.getMessage());
+            log.error(ex.getMessage());
         }
         return list;
     }
 
-    private ArrayList<Book> startParser() {
+    private List<Book> startParser() {
         int page = 0;
-        ArrayList<Book> parsedData = new ArrayList<>();
+        List<Book> parseData = new ArrayList<>();
         while (true) {
             String pageUrl = nextPageUrl(page);
             page++;
-            ArrayList<Book> elements = getElements(pageUrl);
-            parsedData.addAll(elements);
+            List<Book> elements = getElements(pageUrl);
+            parseData.addAll(elements);
             if (elements.isEmpty()) {
                 break;
             }
         }
-        return parsedData;
+        return parseData;
     }
 
     private String nextPageUrl(int page) {
         return urlBase + key + "&p=" + ++page;
     }
 
-    private ArrayList<Book> getElements(String pageUrl) {
+    private List<Book> getElements(String pageUrl) {
         if (positionCounter > 50) {
             needStop = true;
         }
