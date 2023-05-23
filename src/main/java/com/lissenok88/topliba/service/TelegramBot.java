@@ -3,6 +3,7 @@ package com.lissenok88.topliba.service;
 import com.lissenok88.topliba.config.BotConfig;
 import com.lissenok88.topliba.job.BookParser;
 import com.lissenok88.topliba.model.Book;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     private static final String COMMAND_START = "/start";
@@ -24,6 +26,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private static final String MESSAGE_SEARCH_BUTTON = "Напишите без ошибок название книги или имя автора.";
     private static final String SEARCH_MESSAGE = "Запрос принят в обработку: ожидайте";
     private static final String SEARCH_ERROR = "Искомая книга или автор не найден.";
+    private static final String DOWNLOAD_FILE_ERROR = "Что-то пошло не так. Невозможно скачать файл.";
     private final Map<String, List<Book>> listRequest = new HashMap<>();
     final BotConfig config;
 
@@ -52,35 +55,48 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void parseMessage(Message getMessage) {
-        MessageProcessing messageProcessing = new MessageProcessing(config);
-        switch (getMessage.getText()) {
-            case COMMAND_START -> messageProcessing.message(getMessage, START_MESSAGE1 +
-                    System.lineSeparator().repeat(2) + START_MESSAGE2 +
-                    System.lineSeparator().repeat(2) + START_MESSAGE3);
-            case SEARCH_BUTTON -> messageProcessing.message(getMessage, MESSAGE_SEARCH_BUTTON);
-            default -> {
-                messageProcessing.message(getMessage, SEARCH_MESSAGE);
-                List<Book> foundBooks = new ArrayList<>(BookParser.parser(getMessage.getText()));
-                listRequest.put(getMessage.getText(), foundBooks);
-                if (!foundBooks.isEmpty()) {
-                    messageProcessing.messageListBooks(getMessage, foundBooks);
-                } else {
-                    messageProcessing.message(getMessage, SEARCH_ERROR);
+        MessageProcessing messageProcessing = new MessageProcessing();
+        try {
+            switch (getMessage.getText()) {
+                case COMMAND_START -> execute(messageProcessing.message(getMessage, START_MESSAGE1 +
+                        System.lineSeparator().repeat(2) + START_MESSAGE2 +
+                        System.lineSeparator().repeat(2) + START_MESSAGE3));
+                case SEARCH_BUTTON -> messageProcessing.message(getMessage, MESSAGE_SEARCH_BUTTON);
+                default -> {
+                    messageProcessing.message(getMessage, SEARCH_MESSAGE);
+                    List<Book> foundBooks = new ArrayList<>(BookParser.parser(getMessage.getText()));
+                    listRequest.put(getMessage.getText(), foundBooks);
+                    if (!foundBooks.isEmpty()) {
+                        execute(messageProcessing.messageListBooks(getMessage, foundBooks));
+                    } else {
+                        messageProcessing.message(getMessage, SEARCH_ERROR);
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
     }
 
     private void parseButton(String selectButton, CallbackQuery callbackQuery) {
-        MessageProcessing messageProcessing = new MessageProcessing(config);
-        if (selectButton.contains("fb2")) {
-            messageProcessing.messageDownloadFile(callbackQuery.getMessage(), callbackQuery.getData());
-        } else if (selectButton.contains("->") || (selectButton.contains("<-"))) {
-            messageProcessing.editMessageListBooks(callbackQuery.getData(), callbackQuery.getMessage(), listRequest);
-        } else {
-            messageProcessing.deleteMessage(callbackQuery.getMessage());
-            messageProcessing.messageAboutBook(callbackQuery.getMessage().getChatId().toString(),
-                    BookParser.fillElements(callbackQuery.getData()));
+        MessageProcessing messageProcessing = new MessageProcessing();
+        try {
+            if (selectButton.contains("fb2")) {
+                try {
+                    execute(messageProcessing.messageDownloadFile(callbackQuery.getMessage(), callbackQuery.getData()));
+                } catch (Exception e) {
+                    execute(messageProcessing.message(callbackQuery.getMessage(), DOWNLOAD_FILE_ERROR));
+                    log.error(e.getMessage());
+                }
+            } else if (selectButton.contains("->") || (selectButton.contains("<-"))) {
+                execute(messageProcessing.editMessageListBooks(callbackQuery.getData(), callbackQuery.getMessage(), listRequest));
+            } else {
+                execute(messageProcessing.deleteMessage(callbackQuery.getMessage()));
+                execute(messageProcessing.messageAboutBook(callbackQuery.getMessage().getChatId().toString(),
+                        BookParser.fillElements(callbackQuery.getData())));
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
     }
 }

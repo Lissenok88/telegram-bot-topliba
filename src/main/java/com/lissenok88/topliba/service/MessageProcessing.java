@@ -1,9 +1,6 @@
 package com.lissenok88.topliba.service;
 
-import com.lissenok88.topliba.config.BotConfig;
 import com.lissenok88.topliba.model.Book;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -15,60 +12,45 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MessageProcessing extends TelegramBot {
-    private static final Logger log = LoggerFactory.getLogger(MessageProcessing.class);
+public class MessageProcessing {
     private static final String SEARCH_BUTTON_NAME = "Найти книгу.";
     private static final String DOWNLOAD_BUTTON_NAME = "fb2";
     private static final String DOWNLOAD_FILE_MESSAGE = "Открыть файл";
-    private static final String DOWNLOAD_FILE_ERROR = "Что-то пошло не так. Невозможно скачать файл.";
     private static final int COUNT_OF_BOOKS_ON_PAGE = 5;
     private static final int FIRST_PAGE = 1;
     private final ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
 
-    public MessageProcessing(BotConfig config) {
-        super(config);
+    public SendMessage message(Message message, String update) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.enableMarkdown(true);
+        sendMessage.setChatId(message.getChatId().toString());
+        setButtonSearch(sendMessage);
+        sendMessage.setText(update);
+        return sendMessage;
     }
 
-    public void message(Message message, String update) {
-        try {
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.enableMarkdown(true);
-            sendMessage.setChatId(message.getChatId().toString());
-            setButtonSearch(sendMessage);
-            sendMessage.setText(update);
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    public void messageListBooks(Message message, List<Book> foundBooks) {
+    public SendMessage messageListBooks(Message message, List<Book> foundBooks) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         String messageText = formPageTextListBooks(FIRST_PAGE, foundBooks, message.getText());
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(formPageButtonsListBooks(FIRST_PAGE, foundBooks, message.getText()));
         inlineKeyboardMarkup.setKeyboard(rowList);
-        try {
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setReplyMarkup(replyKeyboardMarkup);
-            sendMessage.enableMarkdown(true);
-            sendMessage.setChatId(message.getChatId().toString());
-            sendMessage.setText(messageText);
-            sendMessage.setReplyMarkup(inlineKeyboardMarkup);
-            execute(sendMessage);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
+        sendMessage.enableMarkdown(true);
+        sendMessage.setChatId(message.getChatId().toString());
+        sendMessage.setText(messageText);
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        return sendMessage;
     }
 
-    public void editMessageListBooks(String textButton, Message message,
-                                     Map<String, List<Book>> listRequest) {
+    public EditMessageText editMessageListBooks(String textButton, Message message,
+                                                Map<String, List<Book>> listRequest) {
         int page = getPage(textButton);
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         String nameSearch = getNameSearch(textButton);
@@ -76,17 +58,13 @@ public class MessageProcessing extends TelegramBot {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(formPageButtonsListBooks(page, listRequest.get(nameSearch), nameSearch));
         inlineKeyboardMarkup.setKeyboard(rowList);
-        try {
-            EditMessageText editMessageText = new EditMessageText();
-            editMessageText.setChatId(message.getChatId().toString());
-            editMessageText.setMessageId(message.getMessageId());
-            editMessageText.enableMarkdown(true);
-            editMessageText.setText(textMessage);
-            editMessageText.setReplyMarkup(inlineKeyboardMarkup);
-            execute(editMessageText);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
+        EditMessageText editMessageText = new EditMessageText();
+        editMessageText.setChatId(message.getChatId().toString());
+        editMessageText.setMessageId(message.getMessageId());
+        editMessageText.enableMarkdown(true);
+        editMessageText.setText(textMessage);
+        editMessageText.setReplyMarkup(inlineKeyboardMarkup);
+        return editMessageText;
     }
 
 
@@ -151,27 +129,22 @@ public class MessageProcessing extends TelegramBot {
         keyboardButtons.add(buttonForward);
     }
 
-    public void messageAboutBook(String message, Book bookInformation) {
+    public SendMessage messageAboutBook(String message, Book bookInformation) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(message);
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         String textMassage = formMessageTextAboutBook(bookInformation);
-        try {
-            if (!bookInformation.getUrlFb2().isEmpty()) {
-                inlineKeyboardMarkup.setKeyboard(formMessageButtonAboutBook(bookInformation));
-                sendMessage.setText(textMassage);
-                sendMessage.setReplyMarkup(inlineKeyboardMarkup);
-                execute(sendMessage);
-            } else {
-                setButtonSearch(sendMessage);
-                sendMessage.setText(textMassage);
-                execute(sendMessage);
-            }
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
+        if (!bookInformation.getUrlFb2().isEmpty()) {
+            inlineKeyboardMarkup.setKeyboard(formMessageButtonAboutBook(bookInformation));
+            sendMessage.setText(textMassage);
+            sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        } else {
+            setButtonSearch(sendMessage);
+            sendMessage.setText(textMassage);
         }
+        return sendMessage;
     }
 
     private String formMessageTextAboutBook(Book bookInformation) {
@@ -194,16 +167,11 @@ public class MessageProcessing extends TelegramBot {
         return rowList;
     }
 
-    public void messageDownloadFile(Message message, String urlFile) {
-        try {
-            deleteMessage(message);
-            SendDocument sendDocument = new SendDocument(message.getChatId().toString(), new InputFile(urlFile));
-            sendDocument.setCaption(DOWNLOAD_FILE_MESSAGE);
-            execute(sendDocument);
-        } catch (TelegramApiException e) {
-            message(message, DOWNLOAD_FILE_ERROR);
-            log.error(e.getMessage());
-        }
+    public SendDocument messageDownloadFile(Message message, String urlFile) {
+        deleteMessage(message);
+        SendDocument sendDocument = new SendDocument(message.getChatId().toString(), new InputFile(urlFile));
+        sendDocument.setCaption(DOWNLOAD_FILE_MESSAGE);
+        return sendDocument;
     }
 
     private int getCountPage(int countBooks) {
@@ -243,17 +211,13 @@ public class MessageProcessing extends TelegramBot {
         return page;
     }
 
-    public void deleteMessage(Message message) {
+    public DeleteMessage deleteMessage(Message message) {
         DeleteMessage deleteMessage = new DeleteMessage();
         deleteMessage.setChatId(String.valueOf(message.getChatId()));
         deleteMessage.setMessageId(message.getMessageId());
         deleteMessage.getChatId();
         deleteMessage.getMessageId();
-        try {
-            execute(deleteMessage);
-        } catch (TelegramApiException ex) {
-            log.error(ex.getMessage());
-        }
+        return deleteMessage;
     }
 
     private void setButtonSearch(SendMessage sendMessage) {
