@@ -16,7 +16,6 @@ public class BookParser {
     private static final Logger log = LoggerFactory.getLogger(BookParser.class);
     private static final String urlBase = "https://topliba.com/?q=";
     private static String key;
-    private boolean needStop;
     private int positionCounter = 1;
 
 
@@ -52,15 +51,12 @@ public class BookParser {
     }
 
     private List<Book> getElements(String pageUrl) {
-        if (positionCounter > 50) {
-            needStop = true;
-        }
-        if (needStop) {
-            return new ArrayList<>();
-        }
+        if (positionCounter > 50) return new ArrayList<>();
+
         int position = positionCounter;
         Document doc = getHtml(pageUrl);
         Elements elements = doc.getElementsByClass("media-body");
+
         List<Book> element = elements.stream().map(q -> {
             Book bookInformation = new Book();
             Element titleElement1 = q.getElementsByClass("book-title").first();
@@ -78,6 +74,7 @@ public class BookParser {
             }
             return bookInformation;
         }).toList();
+
         element = element.stream().filter(q -> q.getPosition() > 0).toList();
         return (position != positionCounter) ? new ArrayList<>(element) : new ArrayList<>();
     }
@@ -87,6 +84,7 @@ public class BookParser {
         Document doc = getHtml(url);
         book.setTitle(doc.getElementsByClass("book-title").first().text());
         book.setDescription(doc.getElementsByClass("description").first().text());
+
         String danger = doc.getElementsByClass("alert-danger").text();
         if (!danger.equals("")) {
             book.setFragment(danger + " \n\r Данный файл скачать невозможно.");

@@ -35,17 +35,20 @@ public class MessageProcessing {
     }
 
     public SendMessage messageListBooks(Message message, List<Book> foundBooks) {
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         String messageText = formPageTextListBooks(FIRST_PAGE, foundBooks, message.getText());
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(formPageButtonsListBooks(FIRST_PAGE, foundBooks, message.getText()));
         inlineKeyboardMarkup.setKeyboard(rowList);
+
         SendMessage sendMessage = new SendMessage();
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(message.getChatId().toString());
         sendMessage.setText(messageText);
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+
         return sendMessage;
     }
 
@@ -55,15 +58,18 @@ public class MessageProcessing {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         String nameSearch = getNameSearch(textButton);
         String textMessage = formPageTextListBooks(page, listRequest.get(nameSearch), nameSearch);
+
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(formPageButtonsListBooks(page, listRequest.get(nameSearch), nameSearch));
         inlineKeyboardMarkup.setKeyboard(rowList);
+
         EditMessageText editMessageText = new EditMessageText();
         editMessageText.setChatId(message.getChatId().toString());
         editMessageText.setMessageId(message.getMessageId());
         editMessageText.enableMarkdown(true);
         editMessageText.setText(textMessage);
         editMessageText.setReplyMarkup(inlineKeyboardMarkup);
+
         return editMessageText;
     }
 
@@ -74,6 +80,7 @@ public class MessageProcessing {
         pageText.append(System.lineSeparator().repeat(2));
         pageText.append("*Страница " + page + " из " + getCountPage(foundBooks.size()) + "*");
         pageText.append(System.lineSeparator().repeat(2));
+
         int position = page * COUNT_OF_BOOKS_ON_PAGE - COUNT_OF_BOOKS_ON_PAGE;
         for (int i = 0; i < COUNT_OF_BOOKS_ON_PAGE; i++) {
             if (position < foundBooks.size() && foundBooks.get(position).getUrl() != null) {
@@ -90,13 +97,17 @@ public class MessageProcessing {
     private List<InlineKeyboardButton> formPageButtonsListBooks(int page, List<Book> foundBooks, String nameSearch) {
         int position = page * COUNT_OF_BOOKS_ON_PAGE - COUNT_OF_BOOKS_ON_PAGE;
         List<InlineKeyboardButton> keyboardButtons = new ArrayList<>();
+
         if (page != FIRST_PAGE) {
             addButtonBack(page, nameSearch, keyboardButtons);
         }
+
         addButtonsBookNumbers(position, foundBooks, keyboardButtons);
+
         if (page != getCountPage(foundBooks.size())) {
             addButtonForward(page, nameSearch, keyboardButtons);
         }
+
         return keyboardButtons;
     }
 
@@ -134,6 +145,7 @@ public class MessageProcessing {
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(message);
+
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         String textMassage = formMessageTextAboutBook(bookInformation);
         if (!bookInformation.getUrlFb2().isEmpty()) {
