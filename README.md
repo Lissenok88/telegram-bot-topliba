@@ -14,4 +14,4 @@
 
 -----------------------------------------------------
 
-![Example](https://github.com/Lissenok88/telegram-bot-topliba/doc/topliba1.png)
+![Example](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba1.png)
