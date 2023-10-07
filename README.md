@@ -14,4 +14,11 @@
 
 -----------------------------------------------------
 
-![Example](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba1.png)
+![Example1](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba1.png)
+![Example2](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba2.png)
+![Example3](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba3.png)
+![Example4](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba4.png)
+![Example5](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba5.png)
+![Example6](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba6.png)
+![Example7](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba7.png)
+![Example8](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba8.png)
