@@ -1,5 +1,5 @@
-## Telegram Bot - parser for [Topliba](https://topliba.com)
-==========================================================
+Telegram Bot - parser for [Topliba](https://topliba.com)
+=======================================================
 
 Telegram bot for searching and downloading books from the Toplib website.
 
