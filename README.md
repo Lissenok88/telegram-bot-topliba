@@ -1,28 +1,24 @@
 ## Telegram Bot - parser for [Topliba](https://topliba.com)
+==========================================================
 
-### Телеграм бот для поиска и скачивания книг с сайта Топлиба.
-- Искать можно книгу или конкретного автора.
-- Если бот находит совпадения, он предоставлят список книг. 
-- На одной страничке показывается список из 5 книг. 
-- Если книг больше, с помощью стрелок можно перелистывать страницы.
-- Чтобы выбрать нужную, надо нажать номер книги в списке.
-- После нажатия номера книги, открывается анатация книги.
-- Также снизу пишется: 
-  - "Доступ заблокирован правоболадателем" - книгу нельзя скачать; 
-  - "Скачать ознакомительный фрагмент" - книгу нельзя скачать полностью; 
-  - "Скачать книгу полность" - книга скачивается полностью.
-- Книги скачиваются в формате fb2.
+Telegram bot for searching and downloading books from the Toplib website.
 
------------------------------------------------------
+### Technology stack used:
+* JDK 17
+* Spring Boot 2.7
+* Telegram API 6.3
+* Lombok
+* Maven
 
-- Stack: JDK 17, Spring Boot 2.7, Telegram API 6.3, Lombok, Maven
-
------------------------------------------------------
-
-![Example1](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba1.png)
-![Example2](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba2.png)
-![Example4](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba4.png)
-![Example5](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba5.png)
-![Example6](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba6.png)
-![Example7](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba7.png)
-![Example8](https://github.com/Lissenok88/telegram-bot-topliba/blob/main/doc/topliba8.png)
+### Project key logic:
+- You can search for a book or a specific author.
+- If the bot finds a match, it will provide a list of books.
+- A list of 5 books is shown on one page.
+- If there are more books, you can use the arrows to turn pages.
+- To select the one you need, you need to click the book number in the list.
+- After clicking the book number, the book's anatomy opens.
+- It is also written below:
+  - “Access blocked by the copyright holder” - the book cannot be downloaded;
+  - “Download introductory fragment” - the book cannot be downloaded in full;
+  - “Download the book in full” - the book is downloaded in full.
+- Books are downloaded in fb2 format.
